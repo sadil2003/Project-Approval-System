@@ -1,0 +1,117 @@
+﻿@using Microsoft.AspNetCore.Http
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - PAS BlindMatching</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/PAS_BlindMatching.styles.css" asp-append-version="true" />
+
+    <style>
+        .navbar-brand {
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-link {
+            font-weight: 500;
+        }
+
+        body {
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom box-shadow mb-4 py-3">
+            <div class="container">
+                <a class="navbar-brand text-primary" asp-area="" asp-controller="Home" asp-action="Index">
+                    <i class="bi bi-shield-check me-2"></i>PAS BlindMatching
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Home" asp-action="Index">Home</a>
+                        </li>
+
+                        @* ROLE-BASED NAVIGATION LOGIC *@
+                        @if (Context.Session.GetString("Role") == "Student")
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-info" asp-controller="Project" asp-action="Submit">Submit Proposal</a>
+                            </li>
+                        }
+                        else if (Context.Session.GetString("Role") == "Supervisor")
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-info" asp-controller="Supervisor" asp-action="Index">Project Feed</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-info" asp-controller="Supervisor" asp-action="MyMatches">My Matches</a>
+                            </li>
+                        }
+                        else if (Context.Session.GetString("Role") == "Admin")
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-warning" asp-controller="Admin" asp-action="Projects">Manage Projects</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-warning" asp-controller="Admin" asp-action="Users">Manage Users</a>
+                            </li>
+                        }
+                    </ul>
+
+                    <ul class="navbar-nav">
+                        @if (Context.Session.GetInt32("UserId") != null)
+                        {
+                            <li class="nav-item d-flex align-items-center">
+                                <span class="badge bg-secondary me-3">
+                                    <i class="bi bi-person-circle me-1"></i> @Context.Session.GetString("Role")
+                                </span>
+                            </li>
+                            <li class="nav-item">
+                                <a class="btn btn-sm btn-outline-danger" asp-controller="Account" asp-action="Logout">Logout</a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Account" asp-action="Login">Login</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="btn btn-sm btn-primary ms-lg-2" asp-controller="Account" asp-action="Register">Register</a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted bg-white mt-5">
+        <div class="container text-center py-3">
+            &copy; 2026 - PAS BlindMatching - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy Policy</a>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

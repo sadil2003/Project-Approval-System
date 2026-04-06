@@ -1,0 +1,32 @@
+﻿@model IEnumerable<PAS_BlindMatching.Models.ProjectViewModel>
+
+<div class="container mt-4">
+    <h2 class="text-center mb-4 text-primary font-weight-bold">Available Research Proposals</h2>
+    <p class="text-muted text-center mb-5">Review project details and select one to match. Student identities remain hidden until selection.</p>
+
+    <div class="row">
+        @foreach (var project in Model)
+        {
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100 shadow border-0">
+                    <div class="card-header bg-dark text-white py-3">
+                        <h5 class="card-title mb-0">@project.Title</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="badge bg-info text-dark">@project.ResearchArea</p>
+                        <p class="card-text text-truncate-3">@project.Abstract</p>
+                        <hr />
+                        <p class="small"><strong>Tech Stack:</strong> @project.TechStack</p>
+                        <p class="small text-danger"><strong>Identity:</strong> @project.StudentName</p>
+                    </div>
+                    <div class="card-footer bg-white border-0 pb-3">
+                        <form asp-action="SelectProject" method="post">
+                            <input type="hidden" name="id" value="@project.Id" />
+                            <button type="submit" class="btn btn-primary w-100 shadow-sm">Confirm Match</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

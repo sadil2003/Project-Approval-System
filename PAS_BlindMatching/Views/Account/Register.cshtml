@@ -1,0 +1,33 @@
+﻿@{
+    ViewData["Title"] = "Register";
+}
+
+<h2>Register</h2>
+
+<!-- Show validation errors -->
+@if (!ViewData.ModelState.IsValid)
+{
+    <div style="color:red;">
+        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        {
+            <p>@error.ErrorMessage</p>
+        }
+    </div>
+}
+
+<!-- Register form -->
+<form asp-action="Register" method="post">
+    @Html.AntiForgeryToken()
+    <input type="text" name="name" placeholder="Full Name" required /><br />
+    <input type="email" name="email" placeholder="Email" required /><br />
+    <input type="password" name="password" placeholder="Password" required /><br />
+    <select name="role" required>
+        <option value="">Select Role</option>
+        <option value="Student">Student</option>
+        <option value="Supervisor">Supervisor</option>
+    </select><br />
+    <input type="text" name="researchArea" placeholder="Research Area (optional)" /><br />
+    <button type="submit">Register</button>
+</form>
+
+<p>Already have an account? <a asp-action="Login">Login here</a></p>

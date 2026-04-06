@@ -1,0 +1,108 @@
+﻿@model IEnumerable<PAS_BlindMatching.Models.ProjectViewModel>
+
+@{
+    ViewData["Title"] = "My Matched Projects";
+}
+
+<div class="container mt-5">
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-primary text-white py-3 d-flex justify-content-between align-items-center">
+            <h3 class="mb-0">Confirmed Project Matches</h3>
+            <span class="badge bg-light text-primary">@Model.Count() Matches Total</span>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Project Title</th>
+                            <th>Student Name</th>
+                            <th>Contact Email</th>
+                            <th>Status</th>
+                            <th class="text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-muted">
+                                    <i class="bi bi-folder-x display-4 d-block mb-3"></i>
+                                    No matches found yet. Go to the <a asp-action="Index">Proposal Feed</a> to select a project.
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td class="ps-4 fw-bold">@item.Title</td>
+                                    <td>
+                                        <span class="text-dark">@item.StudentName</span>
+                                    </td>
+                                    <td>
+                                        <a href="mailto:@item.StudentEmail" class="text-decoration-none">
+                                            <i class="bi bi-envelope-at me-1"></i> @item.StudentEmail
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <span class="badge rounded-pill bg-success px-3">@item.Status</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <button class="btn btn-sm btn-outline-primary"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modal-@item.Id">
+                                            View Full Abstract
+                                        </button>
+
+                                        <div class="modal fade text-start" id="modal-@item.Id" tabindex="-1" aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-centered">
+                                                <div class="modal-content">
+                                                    <div class="modal-header bg-light">
+                                                        <h5 class="modal-title">@item.Title</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <p class="text-muted small mb-2"><strong>Research Area:</strong> @item.ResearchArea</p>
+                                                        <p class="text-muted small mb-3"><strong>Tech Stack:</strong> @item.TechStack</p>
+                                                        <hr />
+                                                        <p style="white-space: pre-wrap;">@item.Abstract</p>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a asp-action="Index" class="btn btn-secondary shadow-sm">
+            <i class="bi bi-arrow-left"></i> Back to All Proposals
+        </a>
+    </div>
+</div>
+
+<style>
+    .table thead th {
+        border-top: none;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+    }
+
+    .table tbody td {
+        vertical-align: middle;
+        padding: 1rem 0.75rem;
+    }
+</style>

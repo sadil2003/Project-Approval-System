@@ -1,0 +1,107 @@
+﻿@model List<PAS_BlindMatching.Models.ProjectViewModel>
+
+@{
+    var isAdminView = Model.Any(p => !string.IsNullOrEmpty(p.StudentName)); // simple check
+}
+
+@if (isAdminView)
+{
+    <h2>All Projects</h2>
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Abstract</th>
+                <th>Tech Stack</th>
+                <th>Research Area</th>
+                <th>Status</th>
+                <th>Supervisor</th>
+                <th>Student</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var project in Model)
+            {
+                <tr>
+                    <td>@project.Title</td>
+                    <td>@project.Abstract</td>
+                    <td>@project.TechStack</td>
+                    <td>@project.ResearchArea</td>
+                    <td>
+                        @if (string.Equals(project.Status, "Pending", StringComparison.OrdinalIgnoreCase))
+                        {
+                            <span style="color:orange;">Pending</span>
+                        }
+                        else if (string.Equals(project.Status, "Matched", StringComparison.OrdinalIgnoreCase))
+                        {
+                            <span style="color:green;">Matched</span>
+                        }
+                        else
+                        {
+                            @project.Status
+                        }
+                    </td>
+                    <td>@(project.SupervisorName ?? "Not Assigned")</td>
+                    <td>@(project.StudentName ?? "Unknown") (@(project.StudentEmail ?? "Unknown"))</td>
+                    <td>
+                        <form asp-action="ReassignSupervisor" method="post">
+                            <input type="hidden" name="projectId" value="@project.Id" />
+                            <input type="number" name="newSupervisorId" placeholder="Supervisor ID" class="form-control mb-1" />
+                            <button type="submit" class="btn btn-primary btn-sm">Reassign</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <h2>My Projects</h2>
+
+    @if (!Model.Any())
+    {
+        <p>No projects submitted yet.</p>
+    }
+    else
+    {
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Tech Stack</th>
+                    <th>Research Area</th>
+                    <th>Status</th>
+                    <th>Supervisor</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var project in Model)
+                {
+                    <tr>
+                        <td>@project.Title</td>
+                        <td>@project.TechStack</td>
+                        <td>@project.ResearchArea</td>
+                        <td>
+                            @if (string.Equals(project.Status, "Pending", StringComparison.OrdinalIgnoreCase))
+                            {
+                                <span style="color:orange;">Pending</span>
+                            }
+                            else if (string.Equals(project.Status, "Matched", StringComparison.OrdinalIgnoreCase))
+                            {
+                                <span style="color:green;">Matched</span>
+                            }
+                            else
+                            {
+                                @project.Status
+                            }
+                        </td>
+                        <td>@(project.SupervisorName ?? "Not Assigned")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+}
