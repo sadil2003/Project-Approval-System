@@ -43,20 +43,17 @@
                             <a class="nav-link" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
 
-                        @* SAFETY CHECK: Only show these links if UserId is NOT NULL 
-                           This prevents buttons from appearing on Login/Register screens 
-                        *@
                         @if (Context.Session.GetInt32("UserId") != null)
                         {
                             var userRole = Context.Session.GetString("Role");
 
-                            @if (userRole == "Student")
+                            @if (userRole == "Student" || userRole == "Group")
                             {
                                 <li class="nav-item">
                                     <a class="nav-link text-info" asp-controller="Project" asp-action="Submit">Submit Proposal</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link text-info" asp-controller="Project" asp-action="MyProjects">My Projects</a>
+                                    <a class="nav-link text-info" asp-controller="Project" asp-action="MyProjects">My Proposals</a>
                                 </li>
                             }
                             else if (userRole == "Supervisor")
@@ -99,6 +96,11 @@
                             </li>
                             <li class="nav-item">
                                 <a class="btn btn-sm btn-primary ms-lg-2" asp-controller="Account" asp-action="Register">Register</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="btn btn-sm btn-outline-light ms-lg-2" asp-controller="Account" asp-action="AdminLogin">
+                                    <i class="bi bi-shield-lock-fill me-1"></i>Admin
+                                </a>
                             </li>
                         }
                     </ul>

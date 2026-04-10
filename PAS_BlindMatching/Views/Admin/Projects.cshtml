@@ -1,0 +1,154 @@
+﻿@model List<PAS_BlindMatching.Models.ProjectViewModel>
+
+@{
+    ViewData["Title"] = "Manage Projects";
+}
+
+<div class="container mt-4">
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            <i class="bi bi-check-circle-fill me-2"></i>@TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card shadow border-0">
+        <div class="card-header bg-warning text-dark py-3 d-flex justify-content-between align-items-center">
+            <h3 class="mb-0"><i class="bi bi-kanban me-2"></i>Manage Allocations</h3>
+            <span class="badge bg-dark">@Model.Count total projects</span>
+        </div>
+
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Title</th>
+                            <th>Research Area</th>
+                            <th>Status</th>
+                            <th>Student</th>
+                            <th>Supervisor</th>
+                            <th class="text-center">Reassign</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var project in Model)
+                        {
+                            <tr>
+                                <td class="ps-4 fw-semibold align-middle">
+                                    <button class="btn btn-link p-0 text-start fw-semibold text-decoration-none"
+                                            data-bs-toggle="modal" data-bs-target="#modal-@project.Id">
+                                        @project.Title
+                                    </button>
+                                </td>
+                                <td class="align-middle">
+                                    <span class="badge bg-info text-dark">@project.ResearchArea</span>
+                                </td>
+                                <td class="align-middle">
+                                    @if (project.Status == "Pending")
+                                    {
+                                        <span class="badge rounded-pill bg-warning text-dark px-3">Pending</span>
+                                    }
+                                    else if (project.Status == "Matched")
+                                    {
+                                        <span class="badge rounded-pill bg-success px-3">Matched</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary px-3">@project.Status</span>
+                                    }
+                                </td>
+                                <td class="align-middle small">
+                                    <div>@project.StudentName</div>
+                                    <div class="text-muted">@project.StudentEmail</div>
+                                </td>
+                                <td class="align-middle">@(project.SupervisorName ?? "Not Assigned")</td>
+                                <td class="align-middle text-center">
+                                    <form asp-action="ReassignSupervisor" asp-controller="Admin" method="post" class="d-flex gap-1">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="projectId" value="@project.Id" />
+                                        <input type="number" name="newSupervisorId" placeholder="Supervisor ID"
+                                               class="form-control form-control-sm" style="width:130px;" />
+                                        <button type="submit" class="btn btn-warning btn-sm">Assign</button>
+                                    </form>
+                                </td>
+                            </tr>
+
+                            <div class="modal fade" id="modal-@project.Id" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered modal-lg">
+                                    <div class="modal-content">
+                                        <div class="modal-header bg-warning text-dark">
+                                            <h5 class="modal-title">@project.Title</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="row mb-3">
+                                                <div class="col-sm-4">
+                                                    <p class="mb-1 text-muted small fw-semibold">RESEARCH AREA</p>
+                                                    <span class="badge bg-info text-dark">@project.ResearchArea</span>
+                                                </div>
+                                                <div class="col-sm-4">
+                                                    <p class="mb-1 text-muted small fw-semibold">TECH STACK</p>
+                                                    <p class="mb-0">@project.TechStack</p>
+                                                </div>
+                                                <div class="col-sm-4">
+                                                    <p class="mb-1 text-muted small fw-semibold">STATUS</p>
+                                                    <p class="mb-0">@project.Status</p>
+                                                </div>
+                                            </div>
+                                            <hr />
+                                            <p class="mb-1 text-muted small fw-semibold">ABSTRACT</p>
+                                            <p style="white-space: pre-wrap;">@project.Abstract</p>
+                                            <hr />
+                                            <div class="row">
+                                                <div class="col-sm-6">
+                                                    <p class="mb-1 text-muted small fw-semibold">STUDENT</p>
+                                                    <p class="mb-0">
+                                                        @project.StudentName<br />
+                                                        <a href="mailto:@project.StudentEmail" class="small">@project.StudentEmail</a>
+                                                    </p>
+                                                </div>
+                                                <div class="col-sm-6">
+                                                    <p class="mb-1 text-muted small fw-semibold">SUPERVISOR</p>
+                                                    <p class="mb-0">@(project.SupervisorName ?? "Not assigned")</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .table thead th {
+        border-top: none;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 0.5px;
+        color: #6c757d;
+    }
+
+    .table tbody td {
+        vertical-align: middle;
+        padding: 0.9rem 0.75rem;
+    }
+</style>

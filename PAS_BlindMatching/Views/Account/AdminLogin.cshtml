@@ -1,14 +1,15 @@
 ﻿@{
-    ViewData["Title"] = "Login";
+    ViewData["Title"] = "Admin Login";
 }
 
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-5">
             <div class="card shadow border-0">
-                <div class="card-header bg-primary text-white py-4 text-center">
-                    <i class="bi bi-box-arrow-in-right" style="font-size: 2.5rem;"></i>
-                    <h3 class="mt-2 mb-0">Sign In</h3>
+                <div class="card-header bg-dark text-white py-4 text-center">
+                    <i class="bi bi-shield-lock-fill" style="font-size: 2.5rem;"></i>
+                    <h3 class="mt-2 mb-0">Admin Portal</h3>
+                    <p class="text-secondary mb-0 small">Restricted access — authorised personnel only</p>
                 </div>
                 <div class="card-body p-4">
 
@@ -24,33 +25,34 @@
                         </div>
                     }
 
-                    <form asp-action="Login" method="post">
+                    <form asp-action="AdminLogin" method="post">
                         @Html.AntiForgeryToken()
 
                         <div class="mb-3">
-                            <label class="form-label fw-semibold">Email Address</label>
+                            <label class="form-label fw-semibold">Username</label>
                             <div class="input-group">
-                                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-                                <input type="email" name="email" class="form-control" placeholder="your@email.com" required autofocus />
+                                <span class="input-group-text bg-light"><i class="bi bi-person-fill text-dark"></i></span>
+                                <input type="text" name="username" class="form-control" placeholder="Admin username" required autofocus />
                             </div>
                         </div>
 
                         <div class="mb-4">
                             <label class="form-label fw-semibold">Password</label>
                             <div class="input-group">
-                                <span class="input-group-text"><i class="bi bi-lock"></i></span>
-                                <input type="password" name="password" class="form-control" placeholder="Your password" required />
+                                <span class="input-group-text bg-light"><i class="bi bi-lock-fill text-dark"></i></span>
+                                <input type="password" name="password" class="form-control" placeholder="Password" required />
                             </div>
                         </div>
 
-                        <button type="submit" class="btn btn-primary w-100 py-2">
-                            <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+                        <button type="submit" class="btn btn-dark w-100 py-2">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Sign In as Admin
                         </button>
                     </form>
                 </div>
                 <div class="card-footer text-center py-3 bg-light">
-                    Don't have an account?
-                    <a asp-action="Register" class="text-primary fw-semibold">Register here</a>
+                    <a asp-controller="Home" asp-action="Index" class="text-secondary text-decoration-none small">
+                        <i class="bi bi-arrow-left me-1"></i>Back to Home
+                    </a>
                 </div>
             </div>
         </div>

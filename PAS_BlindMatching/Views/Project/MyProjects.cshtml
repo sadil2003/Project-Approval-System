@@ -1,107 +1,188 @@
 ﻿@model List<PAS_BlindMatching.Models.ProjectViewModel>
 
 @{
-    var isAdminView = Model.Any(p => !string.IsNullOrEmpty(p.StudentName)); // simple check
+    ViewData["Title"] = "My Proposals";
 }
 
-@if (isAdminView)
-{
-    <h2>All Projects</h2>
+<div class="container mt-4">
 
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Title</th>
-                <th>Abstract</th>
-                <th>Tech Stack</th>
-                <th>Research Area</th>
-                <th>Status</th>
-                <th>Supervisor</th>
-                <th>Student</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var project in Model)
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            <i class="bi bi-check-circle-fill me-2"></i>@TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card shadow border-0">
+        <div class="card-header bg-primary text-white py-3 d-flex justify-content-between align-items-center">
+            <h3 class="mb-0"><i class="bi bi-list-check me-2"></i>My Proposals</h3>
+            <a asp-controller="Project" asp-action="Submit" class="btn btn-light btn-sm">
+                <i class="bi bi-plus-circle me-1"></i>New Proposal
+            </a>
+        </div>
+
+        <div class="card-body p-0">
+            @if (!Model.Any())
             {
-                <tr>
-                    <td>@project.Title</td>
-                    <td>@project.Abstract</td>
-                    <td>@project.TechStack</td>
-                    <td>@project.ResearchArea</td>
-                    <td>
-                        @if (string.Equals(project.Status, "Pending", StringComparison.OrdinalIgnoreCase))
-                        {
-                            <span style="color:orange;">Pending</span>
-                        }
-                        else if (string.Equals(project.Status, "Matched", StringComparison.OrdinalIgnoreCase))
-                        {
-                            <span style="color:green;">Matched</span>
-                        }
-                        else
-                        {
-                            @project.Status
-                        }
-                    </td>
-                    <td>@(project.SupervisorName ?? "Not Assigned")</td>
-                    <td>@(project.StudentName ?? "Unknown") (@(project.StudentEmail ?? "Unknown"))</td>
-                    <td>
-                        <form asp-action="ReassignSupervisor" method="post">
-                            <input type="hidden" name="projectId" value="@project.Id" />
-                            <input type="number" name="newSupervisorId" placeholder="Supervisor ID" class="form-control mb-1" />
-                            <button type="submit" class="btn btn-primary btn-sm">Reassign</button>
-                        </form>
-                    </td>
-                </tr>
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-folder-x display-4 d-block mb-3"></i>
+                    <p>No proposals submitted yet.</p>
+                    <a asp-controller="Project" asp-action="Submit" class="btn btn-primary">Submit Your First Proposal</a>
+                </div>
             }
-        </tbody>
-    </table>
-}
-else
-{
-    <h2>My Projects</h2>
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">Title</th>
+                                <th>Research Area</th>
+                                <th>Tech Stack</th>
+                                <th>Status</th>
+                                <th>Supervisor</th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var project in Model)
+                            {
+                                <tr>
+                                    <td class="ps-4 fw-semibold align-middle">@project.Title</td>
+                                    <td class="align-middle">
+                                        @if (!string.IsNullOrWhiteSpace(project.ResearchArea) && project.ResearchArea != "Not Specified")
+                                        {
+                                            <span class="badge bg-info text-dark">@project.ResearchArea</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted small">Not specified</span>
+                                        }
+                                    </td>
+                                    <td class="align-middle small text-muted">@project.TechStack</td>
+                                    <td class="align-middle">
+                                        @if (project.Status == "Pending")
+                                        {
+                                            <span class="badge rounded-pill bg-warning text-dark px-3">
+                                                <i class="bi bi-clock me-1"></i>Pending
+                                            </span>
+                                        }
+                                        else if (project.Status == "Matched")
+                                        {
+                                            <span class="badge rounded-pill bg-success px-3">
+                                                <i class="bi bi-check-circle me-1"></i>Matched
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary px-3">@project.Status</span>
+                                        }
+                                    </td>
+                                    <td class="align-middle">
+                                        @if (!string.IsNullOrEmpty(project.SupervisorName))
+                                        {
+                                            <span class="text-success fw-semibold">
+                                                <i class="bi bi-person-check me-1"></i>@project.SupervisorName
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted small">Not assigned yet</span>
+                                        }
+                                    </td>
+                                    <td class="align-middle text-center">
+                                        <div class="d-flex gap-2 justify-content-center">
+                                            @* View details modal trigger *@
+                                            <button class="btn btn-sm btn-outline-primary"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#modal-@project.Id"
+                                                    title="View Details">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
 
-    @if (!Model.Any())
-    {
-        <p>No projects submitted yet.</p>
+                                            @* Edit button — only for Pending proposals *@
+                                            @if (project.Status == "Pending")
+                                            {
+                                                <a asp-controller="Project" asp-action="Edit" asp-route-id="@project.Id"
+                                                   class="btn btn-sm btn-outline-warning" title="Edit Proposal">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <button class="btn btn-sm btn-outline-secondary" disabled title="Cannot edit — already matched">
+                                                    <i class="bi bi-pencil"></i>
+                                                </button>
+                                            }
+                                        </div>
+
+                                        @* Details Modal *@
+                                        <div class="modal fade text-start" id="modal-@project.Id" tabindex="-1" aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-centered modal-lg">
+                                                <div class="modal-content">
+                                                    <div class="modal-header bg-light">
+                                                        <h5 class="modal-title">@project.Title</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <div class="row mb-3">
+                                                            <div class="col-sm-6">
+                                                                <p class="mb-1 text-muted small fw-semibold">RESEARCH AREA</p>
+                                                                <p>@(project.ResearchArea ?? "Not specified")</p>
+                                                            </div>
+                                                            <div class="col-sm-6">
+                                                                <p class="mb-1 text-muted small fw-semibold">TECH STACK</p>
+                                                                <p>@project.TechStack</p>
+                                                            </div>
+                                                        </div>
+                                                        <hr />
+                                                        <p class="mb-1 text-muted small fw-semibold">ABSTRACT</p>
+                                                        <p style="white-space: pre-wrap;">@project.Abstract</p>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        @if (project.Status == "Pending")
+                                                        {
+                                                            <a asp-controller="Project" asp-action="Edit" asp-route-id="@project.Id"
+                                                               class="btn btn-warning btn-sm">
+                                                                <i class="bi bi-pencil me-1"></i>Edit This Proposal
+                                                            </a>
+                                                        }
+                                                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .table thead th {
+        border-top: none;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 0.5px;
+        color: #6c757d;
     }
-    else
-    {
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Title</th>
-                    <th>Tech Stack</th>
-                    <th>Research Area</th>
-                    <th>Status</th>
-                    <th>Supervisor</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var project in Model)
-                {
-                    <tr>
-                        <td>@project.Title</td>
-                        <td>@project.TechStack</td>
-                        <td>@project.ResearchArea</td>
-                        <td>
-                            @if (string.Equals(project.Status, "Pending", StringComparison.OrdinalIgnoreCase))
-                            {
-                                <span style="color:orange;">Pending</span>
-                            }
-                            else if (string.Equals(project.Status, "Matched", StringComparison.OrdinalIgnoreCase))
-                            {
-                                <span style="color:green;">Matched</span>
-                            }
-                            else
-                            {
-                                @project.Status
-                            }
-                        </td>
-                        <td>@(project.SupervisorName ?? "Not Assigned")</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+
+    .table tbody td {
+        vertical-align: middle;
+        padding: 0.9rem 0.75rem;
     }
-}
+</style>

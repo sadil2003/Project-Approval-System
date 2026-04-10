@@ -14,26 +14,38 @@ namespace PAS_BlindMatching.Controllers
             _context = context;
         }
 
-        // 1. Show available projects (Blind Feed)
+        // 1. Show available projects filtered by supervisor's research area (Blind Feed)
         public async Task<IActionResult> Index()
         {
-            // Ensure only authorized supervisors can access
             var role = HttpContext.Session.GetString("Role");
+            var supervisorId = HttpContext.Session.GetInt32("UserId");
+
             if (role != "Supervisor") return RedirectToAction("Login", "Account");
 
-            var projects = await _context.Projects
-                .Where(p => p.Status == "Pending")
+            // Get this supervisor's research area from DB
+            var supervisor = await _context.Users.FindAsync(supervisorId);
+            var supervisorArea = supervisor?.ResearchArea;
+
+            // Filter projects: Pending AND matching supervisor's research area (if they have one)
+            var query = _context.Projects
+                .Where(p => p.Status == "Pending");
+
+            if (!string.IsNullOrWhiteSpace(supervisorArea))
+                query = query.Where(p => p.ResearchArea == supervisorArea);
+
+            var projects = await query
                 .Select(p => new ProjectViewModel
                 {
                     Id = p.Id,
                     Title = p.Title,
-                    Abstract = p.Abstract,   // Needed for the Modal popup
-                    TechStack = p.TechStack, // Needed for the Modal popup
+                    Abstract = p.Abstract,
+                    TechStack = p.TechStack,
                     ResearchArea = p.ResearchArea,
                     Status = p.Status,
                     StudentName = "Hidden (Blind Review)"
                 }).ToListAsync();
 
+            ViewBag.SupervisorArea = supervisorArea;
             return View(projects);
         }
 
@@ -48,13 +60,10 @@ namespace PAS_BlindMatching.Controllers
             var project = await _context.Projects.FindAsync(id);
             if (project == null) return NotFound();
 
-            // Update project status and assign current supervisor
             project.SupervisorId = supervisorId;
             project.Status = "Matched";
 
             await _context.SaveChangesAsync();
-
-            // Redirect to MyMatches to see the revealed student info
             return RedirectToAction("MyMatches");
         }
 
@@ -66,16 +75,15 @@ namespace PAS_BlindMatching.Controllers
 
             var matchedProjects = await _context.Projects
                 .Where(p => p.SupervisorId == supervisorId)
-                .Include(p => p.Student) // Joins User table for Name/Email
+                .Include(p => p.Student)
                 .Select(p => new ProjectViewModel
                 {
                     Id = p.Id,
                     Title = p.Title,
-                    Abstract = p.Abstract,   // Passed to View for the Modal
-                    TechStack = p.TechStack, // Passed to View for the Modal
+                    Abstract = p.Abstract,
+                    TechStack = p.TechStack,
                     ResearchArea = p.ResearchArea,
                     Status = p.Status,
-                    // Identity is now revealed
                     StudentName = p.Student != null ? p.Student.Name : "Unknown",
                     StudentEmail = p.Student != null ? p.Student.Email : "Unknown"
                 })

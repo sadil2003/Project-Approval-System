@@ -9,7 +9,7 @@
         public string ResearchArea { get; set; }
         public string Status { get; set; } = "Pending";
 
-        public int StudentId { get; set; }
+        public int StudentId { get; set; }   // Stores both Student and Group user IDs
         public int? SupervisorId { get; set; }
 
         // Navigation properties

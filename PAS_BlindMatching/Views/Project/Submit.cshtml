@@ -1,15 +1,75 @@
 ﻿@{
-    ViewData["Title"] = "Submit Project";
+    ViewData["Title"] = "Submit Proposal";
+    var researchAreas = ViewBag.ResearchAreas as List<string> ?? new List<string>();
 }
 
-<h2>Submit Project</h2>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7">
+            <div class="card shadow border-0">
+                <div class="card-header bg-primary text-white py-4 text-center">
+                    <i class="bi bi-file-earmark-plus-fill" style="font-size: 2.5rem;"></i>
+                    <h3 class="mt-2 mb-0">Submit a Research Proposal</h3>
+                    <p class="text-white-50 mb-0 small">Your identity remains hidden until a supervisor selects your project.</p>
+                </div>
+                <div class="card-body p-4">
 
-<form method="post" asp-action="Submit" asp-controller="Project">
-    @Html.AntiForgeryToken()
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["Error"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
 
-    <input type="text" name="title" placeholder="Project Title" required /><br />
-    <textarea name="abstract" placeholder="Abstract" required></textarea><br />
-    <input type="text" name="techStack" placeholder="Tech Stack" required /><br />
-    <input type="text" name="researchArea" placeholder="Research Area" required /><br />
-    <button type="submit">Submit</button>
-</form>
+                    <form method="post" asp-action="Submit" asp-controller="Project">
+                        @Html.AntiForgeryToken()
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Project Title <span class="text-danger">*</span></label>
+                            <input type="text" name="title" class="form-control" placeholder="e.g. AI-based Intrusion Detection System" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Abstract <span class="text-danger">*</span></label>
+                            <textarea name="abstract" class="form-control" rows="5"
+                                      placeholder="Describe your project goals, methodology, and expected outcomes..." required></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Tech Stack <span class="text-danger">*</span></label>
+                            <input type="text" name="techStack" class="form-control"
+                                   placeholder="e.g. Python, TensorFlow, React, SQL Server" required />
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">
+                                Research Area
+                                <span class="text-muted fw-normal small">(optional)</span>
+                            </label>
+                            <select name="researchArea" class="form-select">
+                                <option value="">-- Select a research area --</option>
+                                @foreach (var area in researchAreas)
+                                {
+                                    <option value="@area">@area</option>
+                                }
+                            </select>
+                            <div class="form-text text-muted">
+                                Selecting a research area helps supervisors find your proposal more easily.
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 py-2">
+                            <i class="bi bi-send me-2"></i>Submit Proposal
+                        </button>
+                    </form>
+                </div>
+                <div class="card-footer text-center py-3 bg-light">
+                    <a asp-controller="Project" asp-action="MyProjects" class="text-secondary text-decoration-none small">
+                        <i class="bi bi-list-check me-1"></i>View My Submissions
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

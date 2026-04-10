@@ -1,33 +1,129 @@
 ﻿@{
     ViewData["Title"] = "Register";
+    var researchAreas = ViewBag.ResearchAreas as List<string> ?? new List<string>();
 }
 
-<h2>Register</h2>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow border-0">
+                <div class="card-header bg-primary text-white py-4 text-center">
+                    <i class="bi bi-person-plus-fill" style="font-size: 2.5rem;"></i>
+                    <h3 class="mt-2 mb-0">Create Account</h3>
+                </div>
+                <div class="card-body p-4">
 
-<!-- Show validation errors -->
-@if (!ViewData.ModelState.IsValid)
-{
-    <div style="color:red;">
-        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
-        {
-            <p>@error.ErrorMessage</p>
-        }
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                            {
+                                <span>@error.ErrorMessage</span>
+                            }
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <form asp-action="Register" method="post" id="registerForm">
+                        @Html.AntiForgeryToken()
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Full Name</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                <input type="text" name="name" class="form-control" placeholder="Your full name" required />
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Email Address</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                <input type="email" name="email" class="form-control" placeholder="your@email.com" required />
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                                <input type="password" name="password" class="form-control" placeholder="Create a password" required />
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Role</label>
+                            <select name="role" id="roleSelect" class="form-select" required onchange="handleRoleChange()">
+                                <option value="">-- Select your role --</option>
+                                <option value="Student">Student</option>
+                                <option value="Group">Group</option>
+                                <option value="Supervisor">Supervisor</option>
+                            </select>
+                        </div>
+
+                        @* Research Area: shown for all roles, mandatory for Supervisor *@
+                        <div class="mb-3" id="researchAreaWrapper" style="display:none;">
+                            <label class="form-label fw-semibold" id="researchAreaLabel">
+                                Research Area
+                                <span id="researchAreaOptional" class="text-muted fw-normal small">(optional)</span>
+                                <span id="researchAreaRequired" class="text-danger fw-normal small" style="display:none;">*required for Supervisors</span>
+                            </label>
+                            <select name="researchArea" id="researchAreaSelect" class="form-select">
+                                <option value="">-- Select a research area --</option>
+                                @foreach (var area in researchAreas)
+                                {
+                                    <option value="@area">@area</option>
+                                }
+                            </select>
+                            <div class="form-text" id="researchAreaHint"></div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 py-2 mt-2">
+                            <i class="bi bi-check-circle me-2"></i>Register
+                        </button>
+                    </form>
+                </div>
+                <div class="card-footer text-center py-3 bg-light">
+                    Already have an account?
+                    <a asp-action="Login" class="text-primary fw-semibold">Sign in here</a>
+                </div>
+            </div>
+        </div>
     </div>
+</div>
+
+@section Scripts {
+    <script>
+        function handleRoleChange() {
+            const role = document.getElementById('roleSelect').value;
+            const wrapper = document.getElementById('researchAreaWrapper');
+            const select = document.getElementById('researchAreaSelect');
+            const optionalBadge = document.getElementById('researchAreaOptional');
+            const requiredBadge = document.getElementById('researchAreaRequired');
+            const hint = document.getElementById('researchAreaHint');
+
+            if (role === '') {
+                wrapper.style.display = 'none';
+                select.removeAttribute('required');
+                return;
+            }
+
+            wrapper.style.display = 'block';
+
+            if (role === 'Supervisor') {
+                select.setAttribute('required', 'required');
+                optionalBadge.style.display = 'none';
+                requiredBadge.style.display = 'inline';
+                hint.textContent = 'Supervisors must select their primary research area. Projects will be filtered to match this area.';
+                hint.className = 'form-text text-danger';
+            } else {
+                select.removeAttribute('required');
+                optionalBadge.style.display = 'inline';
+                requiredBadge.style.display = 'none';
+                hint.textContent = 'Optionally select a research area to help match your proposal.';
+                hint.className = 'form-text text-muted';
+            }
+        }
+    </script>
 }
-
-<!-- Register form -->
-<form asp-action="Register" method="post">
-    @Html.AntiForgeryToken()
-    <input type="text" name="name" placeholder="Full Name" required /><br />
-    <input type="email" name="email" placeholder="Email" required /><br />
-    <input type="password" name="password" placeholder="Password" required /><br />
-    <select name="role" required>
-        <option value="">Select Role</option>
-        <option value="Student">Student</option>
-        <option value="Supervisor">Supervisor</option>
-    </select><br />
-    <input type="text" name="researchArea" placeholder="Research Area (optional)" /><br />
-    <button type="submit">Register</button>
-</form>
-
-<p>Already have an account? <a asp-action="Login">Login here</a></p>

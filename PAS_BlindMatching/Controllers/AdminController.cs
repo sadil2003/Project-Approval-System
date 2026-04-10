@@ -14,19 +14,27 @@ namespace PAS_BlindMatching.Controllers
             _context = context;
         }
 
+        private bool IsAdmin()
+        {
+            return HttpContext.Session.GetString("Role") == "Admin";
+        }
+
         // View all users
         public async Task<IActionResult> Users()
         {
+            if (!IsAdmin()) return RedirectToAction("AdminLogin", "Account");
             var users = await _context.Users.ToListAsync();
-            return View(users);
+            return View("~/Views/user/Users.cshtml", users);
         }
 
-        // View all projects (The main dashboard)
+        // View all projects (main dashboard)
         public async Task<IActionResult> Projects()
         {
+            if (!IsAdmin()) return RedirectToAction("AdminLogin", "Account");
+
             var projects = await _context.Projects
-                .Include(p => p.Student)      // Join Student table
-                .Include(p => p.Supervisor)   // Join Supervisor table
+                .Include(p => p.Student)
+                .Include(p => p.Supervisor)
                 .Select(p => new ProjectViewModel
                 {
                     Id = p.Id,
@@ -44,16 +52,19 @@ namespace PAS_BlindMatching.Controllers
             return View(projects);
         }
 
-        // Reassign supervisor - FIX: Ensures the correct redirection
+        // Reassign supervisor
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ReassignSupervisor(int projectId, int newSupervisorId)
         {
+            if (!IsAdmin()) return RedirectToAction("AdminLogin", "Account");
+
             var project = await _context.Projects.FindAsync(projectId);
             if (project == null) return NotFound();
 
-            // Verify the new supervisor actually exists
-            var supervisorExists = await _context.Users.AnyAsync(u => u.Id == newSupervisorId && u.Role == "Supervisor");
+            var supervisorExists = await _context.Users
+                .AnyAsync(u => u.Id == newSupervisorId && u.Role == "Supervisor");
+
             if (!supervisorExists)
             {
                 TempData["Error"] = "Supervisor ID not found or user is not a Supervisor.";
@@ -61,11 +72,10 @@ namespace PAS_BlindMatching.Controllers
             }
 
             project.SupervisorId = newSupervisorId;
-            project.Status = "Matched"; // Update status since it's now assigned
+            project.Status = "Matched";
 
             await _context.SaveChangesAsync();
             TempData["Success"] = "Supervisor reassigned successfully!";
-
             return RedirectToAction("Projects");
         }
 
@@ -74,6 +84,8 @@ namespace PAS_BlindMatching.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteUser(int userId)
         {
+            if (!IsAdmin()) return RedirectToAction("AdminLogin", "Account");
+
             var user = await _context.Users.FindAsync(userId);
             if (user == null) return NotFound();
 
