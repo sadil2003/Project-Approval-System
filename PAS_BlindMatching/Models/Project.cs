@@ -12,6 +12,9 @@
         public int StudentId { get; set; }   // Stores both Student and Group user IDs
         public int? SupervisorId { get; set; }
 
+        // Group members JSON: [{"Name":"Ali","UserId":"12345"}, ...]
+        public string? GroupMembersJson { get; set; }
+
         // Navigation properties
         public virtual User Student { get; set; }
         public virtual User? Supervisor { get; set; }

@@ -1,0 +1,164 @@
+﻿@model List<PAS_BlindMatching.Models.ProjectViewModel>
+
+@{
+    ViewData["Title"] = "Pairings";
+}
+
+<div class="container mt-4">
+    <div class="card shadow border-0">
+        <div class="card-header bg-success text-white py-3 d-flex justify-content-between align-items-center">
+            <h3 class="mb-0"><i class="bi bi-people-fill me-2"></i>Student–Supervisor Pairings</h3>
+            <span class="badge bg-light text-success">@Model.Count matched</span>
+        </div>
+
+        <div class="card-body p-0">
+            @if (!Model.Any())
+            {
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-person-x display-4 d-block mb-3"></i>
+                    <p>No pairings have been made yet.</p>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">Project Title</th>
+                                <th>Research Area</th>
+                                <th>Student / Group</th>
+                                <th>Group Members</th>
+                                <th>Supervisor</th>
+                                <th class="text-center">Details</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var p in Model)
+                            {
+                                <tr>
+                                    <td class="ps-4 fw-semibold align-middle">@p.Title</td>
+                                    <td class="align-middle">
+                                        <span class="badge bg-info text-dark">@p.ResearchArea</span>
+                                    </td>
+                                    <td class="align-middle">
+                                        <div class="fw-semibold">@p.StudentName</div>
+                                        <div class="text-muted small">@p.StudentEmail</div>
+                                    </td>
+                                    <td class="align-middle">
+                                        @if (p.GroupMembers != null && p.GroupMembers.Any())
+                                        {
+                                            <ul class="list-unstyled mb-0">
+                                                @foreach (var m in p.GroupMembers)
+                                                {
+                                                    <li class="small">
+                                                        <i class="bi bi-person me-1 text-primary"></i>
+                                                        @m.Name <span class="text-muted">(ID: @m.UserId)</span>
+                                                    </li>
+                                                }
+                                            </ul>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted small">—</span>
+                                        }
+                                    </td>
+                                    <td class="align-middle">
+                                        <span class="text-success fw-semibold">
+                                            <i class="bi bi-person-check me-1"></i>@p.SupervisorName
+                                        </span>
+                                    </td>
+                                    <td class="align-middle text-center">
+                                        <button class="btn btn-sm btn-outline-success"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#pairModal-@p.Id">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <!-- Detail Modal -->
+                                <div class="modal fade" id="pairModal-@p.Id" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                                        <div class="modal-content">
+                                            <div class="modal-header bg-success text-white">
+                                                <h5 class="modal-title">@p.Title</h5>
+                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="row mb-3">
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1 text-muted small fw-semibold">RESEARCH AREA</p>
+                                                        <span class="badge bg-info text-dark">@p.ResearchArea</span>
+                                                    </div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1 text-muted small fw-semibold">TECH STACK</p>
+                                                        <p class="mb-0">@p.TechStack</p>
+                                                    </div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1 text-muted small fw-semibold">STATUS</p>
+                                                        <span class="badge bg-success">@p.Status</span>
+                                                    </div>
+                                                </div>
+                                                <hr />
+                                                <p class="mb-1 text-muted small fw-semibold">ABSTRACT</p>
+                                                <p style="white-space: pre-wrap;">@p.Abstract</p>
+                                                <hr />
+                                                <div class="row">
+                                                    <div class="col-sm-6">
+                                                        <p class="mb-1 text-muted small fw-semibold">STUDENT / GROUP LEADER</p>
+                                                        <p class="mb-1">@p.StudentName</p>
+                                                        <a href="mailto:@p.StudentEmail" class="small">@p.StudentEmail</a>
+
+                                                        @if (p.GroupMembers != null && p.GroupMembers.Any())
+                                                        {
+                                                            <p class="mt-3 mb-1 text-muted small fw-semibold">GROUP MEMBERS</p>
+                                                            <ul class="list-group list-group-flush">
+                                                                @foreach (var m in p.GroupMembers)
+                                                                {
+                                                                    <li class="list-group-item px-0 py-1 small">
+                                                                        <i class="bi bi-person-fill me-1 text-primary"></i>
+                                                                        <strong>@m.Name</strong> — ID: <code>@m.UserId</code>
+                                                                    </li>
+                                                                }
+                                                            </ul>
+                                                        }
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <p class="mb-1 text-muted small fw-semibold">SUPERVISOR</p>
+                                                        <p class="mb-0 text-success fw-semibold">
+                                                            <i class="bi bi-person-check me-1"></i>@p.SupervisorName
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .table thead th {
+        border-top: none;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 0.5px;
+        color: #6c757d;
+    }
+
+    .table tbody td {
+        vertical-align: middle;
+        padding: 0.9rem 0.75rem;
+    }
+</style>

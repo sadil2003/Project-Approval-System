@@ -56,7 +56,15 @@
                             @foreach (var project in Model)
                             {
                                 <tr>
-                                    <td class="ps-4 fw-semibold align-middle">@project.Title</td>
+                                    <td class="ps-4 fw-semibold align-middle">
+                                        @project.Title
+                                        @if (project.GroupMembers != null && project.GroupMembers.Any())
+                                        {
+                                            <span class="badge bg-primary ms-1 small">
+                                                <i class="bi bi-people me-1"></i>Group
+                                            </span>
+                                        }
+                                    </td>
                                     <td class="align-middle">
                                         @if (!string.IsNullOrWhiteSpace(project.ResearchArea) && project.ResearchArea != "Not Specified")
                                         {
@@ -100,7 +108,6 @@
                                     </td>
                                     <td class="align-middle text-center">
                                         <div class="d-flex gap-2 justify-content-center">
-                                            @* View details modal trigger *@
                                             <button class="btn btn-sm btn-outline-primary"
                                                     data-bs-toggle="modal"
                                                     data-bs-target="#modal-@project.Id"
@@ -108,7 +115,6 @@
                                                 <i class="bi bi-eye"></i>
                                             </button>
 
-                                            @* Edit button — only for Pending proposals *@
                                             @if (project.Status == "Pending")
                                             {
                                                 <a asp-controller="Project" asp-action="Edit" asp-route-id="@project.Id"
@@ -124,7 +130,7 @@
                                             }
                                         </div>
 
-                                        @* Details Modal *@
+                                        <!-- Details Modal -->
                                         <div class="modal fade text-start" id="modal-@project.Id" tabindex="-1" aria-hidden="true">
                                             <div class="modal-dialog modal-dialog-centered modal-lg">
                                                 <div class="modal-content">
@@ -146,6 +152,21 @@
                                                         <hr />
                                                         <p class="mb-1 text-muted small fw-semibold">ABSTRACT</p>
                                                         <p style="white-space: pre-wrap;">@project.Abstract</p>
+
+                                                        @if (project.GroupMembers != null && project.GroupMembers.Any())
+                                                        {
+                                                            <hr />
+                                                            <p class="mb-2 text-muted small fw-semibold">GROUP MEMBERS</p>
+                                                            <ul class="list-group list-group-flush">
+                                                                @foreach (var m in project.GroupMembers)
+                                                                {
+                                                                    <li class="list-group-item px-0 py-1 small">
+                                                                        <i class="bi bi-person-fill me-1 text-primary"></i>
+                                                                        <strong>@m.Name</strong> — ID: <code>@m.UserId</code>
+                                                                    </li>
+                                                                }
+                                                            </ul>
+                                                        }
                                                     </div>
                                                     <div class="modal-footer">
                                                         @if (project.Status == "Pending")
