@@ -70,6 +70,12 @@
                                 <td class="align-middle small">
                                     <div>@project.StudentName</div>
                                     <div class="text-muted">@project.StudentEmail</div>
+                                    @if (project.GroupMembers != null && project.GroupMembers.Any())
+                                    {
+                                        <span class="badge bg-primary mt-1">
+                                            <i class="bi bi-people me-1"></i>@project.GroupMembers.Count member(s)
+                                        </span>
+                                    }
                                 </td>
                                 <td class="align-middle">@(project.SupervisorName ?? "Not Assigned")</td>
                                 <td class="align-middle text-center">
@@ -111,11 +117,25 @@
                                             <hr />
                                             <div class="row">
                                                 <div class="col-sm-6">
-                                                    <p class="mb-1 text-muted small fw-semibold">STUDENT</p>
+                                                    <p class="mb-1 text-muted small fw-semibold">STUDENT / GROUP LEADER</p>
                                                     <p class="mb-0">
                                                         @project.StudentName<br />
                                                         <a href="mailto:@project.StudentEmail" class="small">@project.StudentEmail</a>
                                                     </p>
+
+                                                    @if (project.GroupMembers != null && project.GroupMembers.Any())
+                                                    {
+                                                        <p class="mt-3 mb-1 text-muted small fw-semibold">GROUP MEMBERS</p>
+                                                        <ul class="list-group list-group-flush">
+                                                            @foreach (var m in project.GroupMembers)
+                                                            {
+                                                                <li class="list-group-item px-0 py-1 small">
+                                                                    <i class="bi bi-person-fill me-1 text-primary"></i>
+                                                                    <strong>@m.Name</strong> — ID: <code>@m.UserId</code>
+                                                                </li>
+                                                            }
+                                                        </ul>
+                                                    }
                                                 </div>
                                                 <div class="col-sm-6">
                                                     <p class="mb-1 text-muted small fw-semibold">SUPERVISOR</p>

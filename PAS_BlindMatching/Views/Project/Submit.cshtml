@@ -1,6 +1,7 @@
 ﻿@{
     ViewData["Title"] = "Submit Proposal";
     var researchAreas = ViewBag.ResearchAreas as List<string> ?? new List<string>();
+    bool isGroup = ViewBag.IsGroup == true;
 }
 
 <div class="container mt-5">
@@ -18,6 +19,18 @@
                     {
                         <div class="alert alert-danger alert-dismissible fade show">
                             <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["Error"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                            {
+                                <div>@error.ErrorMessage</div>
+                            }
                             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
                     }
@@ -59,6 +72,31 @@
                             </div>
                         </div>
 
+                        @if (isGroup)
+                        {
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold text-primary">
+                                    <i class="bi bi-people-fill me-2"></i>Group Members
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <p class="text-muted small mb-2">Add all group members below. Each member needs their full name and university user ID.</p>
+
+                                <div id="membersContainer">
+                                    <div class="member-row d-flex gap-2 mb-2 align-items-center">
+                                        <input type="text" name="memberNames" class="form-control" placeholder="Member Name" required />
+                                        <input type="text" name="memberIds" class="form-control" placeholder="User ID" required />
+                                        <button type="button" class="btn btn-outline-danger btn-sm remove-member" title="Remove" style="display:none;">
+                                            <i class="bi bi-dash-circle"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <button type="button" id="addMemberBtn" class="btn btn-outline-primary btn-sm mt-1">
+                                    <i class="bi bi-plus-circle me-1"></i>Add Another Member
+                                </button>
+                            </div>
+                        }
+
                         <button type="submit" class="btn btn-primary w-100 py-2">
                             <i class="bi bi-send me-2"></i>Submit Proposal
                         </button>
@@ -73,3 +111,37 @@
         </div>
     </div>
 </div>
+
+@if (isGroup)
+{
+    <script>
+        document.getElementById('addMemberBtn')?.addEventListener('click', function () {
+            const container = document.getElementById('membersContainer');
+            const row = document.createElement('div');
+            row.className = 'member-row d-flex gap-2 mb-2 align-items-center';
+            row.innerHTML = `
+                <input type="text" name="memberNames" class="form-control" placeholder="Member Name" required />
+                <input type="text" name="memberIds" class="form-control" placeholder="User ID" required />
+                <button type="button" class="btn btn-outline-danger btn-sm remove-member" title="Remove">
+                    <i class="bi bi-dash-circle"></i>
+                </button>`;
+            container.appendChild(row);
+            updateRemoveButtons();
+        });
+
+        document.getElementById('membersContainer')?.addEventListener('click', function (e) {
+            if (e.target.closest('.remove-member')) {
+                e.target.closest('.member-row').remove();
+                updateRemoveButtons();
+            }
+        });
+
+        function updateRemoveButtons() {
+            const rows = document.querySelectorAll('.member-row');
+            rows.forEach((row, i) => {
+                const btn = row.querySelector('.remove-member');
+                btn.style.display = rows.length > 1 ? 'inline-block' : 'none';
+            });
+        }
+    </script>
+}
